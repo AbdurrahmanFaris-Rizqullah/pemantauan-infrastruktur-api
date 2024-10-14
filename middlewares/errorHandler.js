@@ -10,7 +10,7 @@ function errorHandler(err, req, res, next) {
         status = 401;
         message = "Error login user not found / password not matched";
         break;
-      case "NotFound infrastructure":
+      case "NotFoundinfrastructure":
         status = 404;
         message = "Error not found infrastructure";
         break;

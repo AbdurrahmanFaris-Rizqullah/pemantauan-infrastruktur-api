@@ -1,4 +1,57 @@
+// infrastructureController.js
+
 const { Infrastructure } = require('../models');
+const { Op } = require('sequelize');
+
+// Fungsi untuk mengecek apakah titik ada di dalam poligon
+function isPointInPolygon(point, polygon) {
+    const { latitude, longitude } = point;
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].latitude, yi = polygon[i].longitude;
+        const xj = polygon[j].latitude, yj = polygon[j].longitude;
+
+        const intersect = ((yi > longitude) !== (yj > longitude)) &&
+            (latitude < (xj - xi) * (longitude - yi) / (yj - yi) + xi);
+
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
+}
+
+// Controller untuk mendapatkan infrastruktur dalam area poligon
+const getInfrastructureByPolygon = async (req, res, next) => {
+    try {
+        const { polygon } = req.body; // Poligon dikirim sebagai array dari titik [latitude, longitude]
+
+        if (!polygon || polygon.length < 3) {
+            return res.status(400).json({ message: "Poligon harus memiliki minimal 3 titik" });
+        }
+
+        // Ambil semua data infrastruktur
+        const infrastructures = await Infrastructure.findAll();
+
+        // Filter data infrastruktur yang berada di dalam poligon menggunakan isPointInPolygon
+        const infrastructuresInPolygon = infrastructures.filter(infra => 
+            isPointInPolygon({ latitude: infra.latitude, longitude: infra.longitude }, polygon)
+        );
+
+        if (infrastructuresInPolygon.length === 0) {
+            return res.status(404).json({ message: "Tidak ada infrastruktur dalam area poligon" });
+        }
+
+        res.status(200).json(infrastructuresInPolygon);
+    } catch (err) {
+        next(err);
+    }
+};
+
+module.exports = {
+    getInfrastructureByPolygon,
+};
+
 
 // Menambahkan Infrastruktur Baru (POST)
 exports.createInfrastructure = async (req, res, next) => {
@@ -59,10 +112,13 @@ exports.deleteInfrastructureByName = async (req, res, next) => {
     if (deleted) {
       res.status(200).json({ message: `Infrastructure ${name} deleted successfully` });
     } else {
-      res.status(404).json({ err: 'Infrastructure not found' });
+        throw {name: "NotFoundinfrastructure  "};
     }
   } catch (err) {
     console.log(err);
     next(err);
   }
 };
+
+
+module.exports = infrastructureController;
