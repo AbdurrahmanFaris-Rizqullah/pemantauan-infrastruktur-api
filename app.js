@@ -3,6 +3,7 @@ const app = express();
 const infrasRoutes = require('./Routers/infrastructureRouter');
 const errorHandler = require('./middlewares/errorHandler');
 
+
 app.use(express.json());
 app.use('/api', infrasRoutes);
 app.use(errorHandler);

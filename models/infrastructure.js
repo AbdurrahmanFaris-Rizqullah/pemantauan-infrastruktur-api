@@ -1,7 +1,6 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Infrastructure extends Model {
     /**
@@ -40,9 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     }
   }, {
+    sequelize, // Pass Sequelize instance here
+    modelName: 'Infrastructure',
     tableName: 'infrastructure',
-    timestamps: true, // ini akan menambahkan kolom createdAt dan updatedAt
-  });
-}
-
+    timestamps: true,  });
+  
   return Infrastructure;
+};
