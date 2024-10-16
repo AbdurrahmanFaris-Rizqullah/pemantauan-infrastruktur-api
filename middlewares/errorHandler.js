@@ -6,11 +6,22 @@ function errorHandler(err, req, res, next) {
         status = 400;
         message = "name/ type/ Coordinat/ Status infrastructure cannot be empty";
         break;
+      case "invalid input name":
+        status = 400;
+        message = "wrong input name Infrastructure";
+      case "invalid input type":
+        status = 400;
+        message = "type hanya berisi 'jalan', 'trotoar', 'lampu jalan', 'jembatan', 'drainase' ";
+        break;
+      case "invalid input coordinate":
+        status = 400;
+        message = "Poligon harus memiliki minimal 3 titik";
+        break;
       case "invalid user":
         status = 401;
         message = "Error login user not found / password not matched";
         break;
-      case "NotFoundinfrastructure":
+      case "infrastructure not found":
         status = 404;
         message = "Error not found infrastructure";
         break;

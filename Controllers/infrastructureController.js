@@ -1,5 +1,3 @@
-// infrastructureController.js
-
 const { Infrastructure } = require('../models');
 const { Op } = require('sequelize');
 
@@ -22,103 +20,159 @@ function isPointInPolygon(point, polygon) {
 }
 
 // Controller untuk mendapatkan infrastruktur dalam area poligon
-const getInfrastructureByPolygon = async (req, res, next) => {
+const infrastructureController = {
+  // Handler untuk membuat infrastruktur
+  async createInfrastructure(req, res, next) {
     try {
-        const { polygon } = req.body; // Poligon dikirim sebagai array dari titik [latitude, longitude]
+      const { name, type, latitude, longitude, description, status } = req.body;
 
-        if (!polygon || polygon.length < 3) {
-            return res.status(400).json({ message: "Poligon harus memiliki minimal 3 titik" });
+      // Cek input yang kosong
+      if (!name || !type || !latitude || !longitude || !status) {
+        throw { name: "invalid input" };
+      }
+
+      const newInfrastructure = await Infrastructure.create({
+        name,
+        type,
+        latitude,
+        longitude,
+        description,
+        status
+      });
+
+      res.status(201).json(newInfrastructure);
+    } catch (err) {
+      next(err); // Forward ke error handler middleware
+    }
+  },
+
+  // Handler untuk mendapatkan semua infrastruktur
+  async getAllInfrastructure(req, res, next) {
+    try {
+      const infrastructures = await Infrastructure.findAll();
+      res.status(200).json(infrastructures);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Handler untuk mencari infrastruktur berdasarkan nama
+  async searchInfrastructureByName(req, res, next) {
+    try {
+      const { name } = req.query;
+
+      //validasi input: Jika nama tidak diberikan
+      if (!name) {
+        throw { name: "invalid input name" };
+      }
+
+      const infrastructure = await Infrastructure.findAll(
+        { where: { 
+          name: {
+            [Op.like]: `%${name}%`
+          } 
+        } 
+      });
+
+      if (!infrastructure) {
+       throw { name : "infrastructure not found" };
+
+      }
+      
+      if (infrastructure.length === 0) {
+       throw { name : "infrastructure not found" };
+      }
+
+      if (!name) {
+        throw { name: "invalid input name" };
+
+      }
+
+      res.status(200).json(infrastructure);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Handler untuk update infrastruktur berdasarkan nama
+  async updateInfrastructureByName(req, res, next) {
+    try {
+      const { name } = req.params;
+      const { type, latitude, longitude, description, status } = req.body;
+
+      // Cek input yang kosong
+      if (!type || !latitude || !longitude || !status) {
+        throw { name: "invalid input" };
+      }else if (type !=  "jalan" && type != "trotoar" && type != "lampu jalan" && type != "jembatan" && type != "drainase"){
+        throw {  name: "invalid input type" };
+      }
+
+      const updated = await Infrastructure.update(
+        { type, latitude, longitude, description, status },
+        { where: { name } }
+      );
+
+      if (updated[0] === 0) {
+        th
+      }
+
+      res.status(200).json({ message: 'Infrastructure updated' });
+    } catch (err) {
+      console.log(err)
+      next(err);
+    }
+  },
+
+  // Handler untuk menghapus infrastruktur berdasarkan nama
+  async deleteInfrastructureByName(req, res, next) {
+    try {
+      const { name } = req.params;
+      const deleted = await Infrastructure.destroy({ where: { name } });
+
+      if (!deleted) {
+        throw {name : "infrastructure not found"};
+      }
+
+      res.status(200).json({ message: 'Infrastructure deleted' });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async getInfrastructureByPolygon(req, res, next) {
+    try {
+        const { coordinates } = req.body; // Array koordinat: [{latitude, longitude}, {latitude, longitude}, ...]
+        console.log("Koordinat input:", coordinates);
+
+        // Validasi input: minimal ada 3 koordinat untuk membentuk poligon
+        if (!coordinates || coordinates.length < 3) {
+            throw { name: "invalid input coordinate" };
         }
 
-        // Ambil semua data infrastruktur
+        // Dapatkan semua infrastruktur dari database
         const infrastructures = await Infrastructure.findAll();
 
-        // Filter data infrastruktur yang berada di dalam poligon menggunakan isPointInPolygon
-        const infrastructuresInPolygon = infrastructures.filter(infra => 
-            isPointInPolygon({ latitude: infra.latitude, longitude: infra.longitude }, polygon)
-        );
+        // Filter infrastruktur berdasarkan apakah titiknya berada dalam poligon
+        const infrastructuresInPolygon = infrastructures.filter(infrastructure => {
+            const point = {
+                latitude: infrastructure.latitude,
+                longitude: infrastructure.longitude,
+            };
+            // Cek apakah titik infrastruktur berada di dalam poligon
+            return isPointInPolygon(point, coordinates.map(c => ({ latitude: c.latitude, longitude: c.longitude })));
+        });
 
+        // Jika tidak ada infrastruktur yang ditemukan di dalam poligon
         if (infrastructuresInPolygon.length === 0) {
-            return res.status(404).json({ message: "Tidak ada infrastruktur dalam area poligon" });
+            throw { name: "infrastructure not found" };
         }
 
         res.status(200).json(infrastructuresInPolygon);
     } catch (err) {
         next(err);
     }
-};
-
-module.exports = {
-    getInfrastructureByPolygon,
-};
-
-
-// Menambahkan Infrastruktur Baru (POST)
-exports.createInfrastructure = async (req, res, next) => {
-    try {
-        const newInfrastructure = await Infrastructure.create(req.body);
-        res.status(201).json(newInfrastructure);
-    } catch (err) {
-        console.log(err);
-        next(err);
-    }
-};
-
-// Mengambil Semua Infrastruktur (GET)
-exports.getAllInfrastructure = async (req, res, next) => {
-  try {
-    const infrastructures = await Infrastructure.findAll();
-    res.status(200).json(infrastructures);
-  } catch (err) {
-    console.log(err);
-    next(err);
   }
-};
 
-// Mengambil Infrastruktur Berdasarkan Nama (GET)
-exports.searchInfrastructureByName = async (req, res, next) => {
-  try {
-    const { name } = req.query;
-    const infrastructures = await Infrastructure.findAll({ where: { name } });
-    res.status(200).json(infrastructures);
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
-};
-
-// Memperbarui Infrastruktur Berdasarkan Nama (PUT)
-exports.updateInfrastructureByName = async (req, res, next) => {
-  try {
-    const { name } = req.params;
-    const [updated] = await Infrastructure.update(req.body, { where: { name } });
-    if (updated) {
-      const updatedInfrastructure = await Infrastructure.findOne({ where: { name } });
-      res.status(200).json(updatedInfrastructure);
-    } else {
-      res.status(404).json({ err: 'Infrastructure not found' });
-    }
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
-};
-
-// Menghapus Infrastruktur Berdasarkan Nama (DELETE)
-exports.deleteInfrastructureByName = async (req, res, next) => {
-  try {
-    const { name } = req.params;
-    const deleted = await Infrastructure.destroy({ where: { name } });
-    if (deleted) {
-      res.status(200).json({ message: `Infrastructure ${name} deleted successfully` });
-    } else {
-        throw {name: "NotFoundinfrastructure  "};
-    }
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
-};
-
+}
 
 module.exports = infrastructureController;

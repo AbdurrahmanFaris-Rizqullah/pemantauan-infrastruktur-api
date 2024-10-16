@@ -1,15 +1,16 @@
-// routes/infrastructureRoutes.js
-
 const express = require('express');
-const router = express.Router();
-const infrastructureController = require('../controllers/infrastructureController'); // Pastikan diimpor dengan benar
+const infrastructureController = require('../controllers/infrastructureController');
+const errorHandler = require('../middlewares/errorHandler'); // middleware error handler
 
-// Route untuk mendapatkan infrastruktur berdasarkan area poligon
-router.post('/polygon', infrastructureController.getInfrastructureByPolygon);
-router.post('/infrastructure', infrastructureController.createInfrastructure);
-router.get('/infrastructure', infrastructureController.getAllInfrastructure);
-router.get('/infrastructure/search', infrastructureController.searchInfrastructureByName);
-router.put('/infrastructure/:name', infrastructureController.updateInfrastructureByName);
-router.delete('/infrastructure/:name', infrastructureController.deleteInfrastructureByName);
+const router = express.Router();
+
+
+router.post('/infrastructure', infrastructureController.createInfrastructure); // Route untuk membuat infrastruktur baru
+router.get('/infrastructure', infrastructureController.getAllInfrastructure);  // Route untuk mendapatkan semua infrastruktur
+router.get('/infrastructure/search', infrastructureController.searchInfrastructureByName); // Route untuk mencari infrastruktur berdasarkan nama
+router.put('/infrastructure/:name', infrastructureController.updateInfrastructureByName);// Route untuk update infrastruktur berdasarkan nama
+router.post('/infrastructure/polygon', infrastructureController.getInfrastructureByPolygon);// Route untuk mendapatkan infrastruktur berdasarkan area poligon
+router.delete('/infrastructure/:name', infrastructureController.deleteInfrastructureByName);// Route untuk menghapus infrastruktur berdasarkan nama
+router.use(errorHandler);// Tambahkan middleware error handler di akhir router
 
 module.exports = router;
