@@ -13,6 +13,14 @@ function errorHandler(err, req, res, next) {
         status = 400;
         message = "type hanya berisi 'jalan', 'trotoar', 'lampu jalan', 'jembatan', 'drainase' ";
         break;
+      case "invalid input status":
+        status = 400;
+        message = "status hanya berisi 'baik', 'rusak', 'dalam perbaikan' ";
+        break;
+      case "invalid input format JSON":
+        status = 400;
+        message = "cek kembali format JSON ada yang salah baik penggunaan tanda kutip atau penggunaan tanda koma";
+        break;
       case "invalid input coordinate":
         status = 400;
         message = "Poligon harus memiliki minimal 3 titik";

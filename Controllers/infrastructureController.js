@@ -26,10 +26,30 @@ const infrastructureController = {
     try {
       const { name, type, latitude, longitude, description, status } = req.body;
 
+      
+
+       // Cek jika req.body adalah object
+       if (typeof req.body !== 'object' || Array.isArray(req.body)) {
+        return next({ name: "invalid input format JSON" });
+      }
+
       // Cek input yang kosong
       if (!name || !type || !latitude || !longitude || !status) {
         throw { name: "invalid input" };
       }
+
+      // cek type yg berbeda penulisannya
+      if (type !=  "jalan" && type != "trotoar" && type != "lampu jalan" && type != "jembatan" && type != "drainase"){
+      throw {  name: "invalid input type" };
+      }
+
+      // cek status  yg berbeda penulisannya
+      const validStatus = ["baik",  "rusak", "dalam perbaikan"];
+      if ( !validStatus.includes(status) ){
+      throw { name : "invalid input status"};
+      }
+
+      
 
       const newInfrastructure = await Infrastructure.create({
         name,
@@ -39,7 +59,7 @@ const infrastructureController = {
         description,
         status
       });
-
+      
       res.status(201).json(newInfrastructure);
     } catch (err) {
       next(err); // Forward ke error handler middleware
@@ -83,10 +103,6 @@ const infrastructureController = {
        throw { name : "infrastructure not found" };
       }
 
-      if (!name) {
-        throw { name: "invalid input name" };
-
-      }
 
       res.status(200).json(infrastructure);
     } catch (err) {
@@ -103,8 +119,16 @@ const infrastructureController = {
       // Cek input yang kosong
       if (!type || !latitude || !longitude || !status) {
         throw { name: "invalid input" };
+      
+      // cek type yg tidak sesuai penulisannya
       }else if (type !=  "jalan" && type != "trotoar" && type != "lampu jalan" && type != "jembatan" && type != "drainase"){
         throw {  name: "invalid input type" };
+      }
+
+      // cek status yg tidak sesuai penulisannya
+      const validStatus = ["baik",  "rusak", "dalam perbaikan"];
+      if ( !validStatus.includes(status) ){
+      throw { name : "invalid input status"};
       }
 
       const updated = await Infrastructure.update(
@@ -113,7 +137,7 @@ const infrastructureController = {
       );
 
       if (updated[0] === 0) {
-        th
+        throw { name: "infrastructure not found" };
       }
 
       res.status(200).json({ message: 'Infrastructure updated' });
