@@ -1,0 +1,220 @@
+{
+"openapi": "3.0.0",
+        "info": {
+      "title": "Public Infrastructure Monitoring API",
+      "description": "API untuk memantau dan memelihara infrastruktur publik seperti jalan, trotoar, dan lampu jalan.",
+      "version": "Beta 1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000/api-docs",
+        "description": "Local Server"
+      }
+    ],
+    "paths": {
+      "/infrastructure": {
+        "post": {
+          "summary": "Membuat infrastruktur baru",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "example": "Jalan ABC" },
+                    "type": { "type": "string", "enum": ["jalan", "trotoar", "lampu jalan", "jembatan", "drainase"],"example": "jalan" },
+                    "latitude": { "type": "number", "example": -6.200000 },
+                    "longitude": { "type": "number", "example": 106.816666 },
+                    "status": { "type": "string", "enum": ["baik", "rusak", "dalam perbaikan"], "example": "baik" }
+                  },
+                  "required": ["name", "type", "latitude", "longitude", "status"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Infrastruktur berhasil dibuat",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Infrastructure"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Kesalahan validasi input"
+            }
+          }
+        },
+        "get": {
+          "summary": "Mengambil semua data infrastruktur",
+          "responses": {
+            "200": {
+              "description": "Daftar infrastruktur berhasil diambil",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Infrastructure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/infrastructure/search": {
+        "get": {
+          "summary": "Mencari infrastruktur berdasarkan nama",
+          "parameters": [
+            {
+              "name": "name",
+              "in": "query",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Infrastruktur ditemukan",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Infrastructure"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Infrastruktur tidak ditemukan"
+            }
+          }
+        }
+      },
+      "/infrastructure/polygon": {
+        "post": {
+          "summary": "Mencari infrastruktur di dalam area poligon",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "polygon": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "latitude": { "type": "number", "example": -6.200000 },
+                          "longitude": { "type": "number", "example": 106.816666 }
+                        },
+                        "required": ["latitude", "longitude"]
+                      }
+                    }
+                  },
+                  "required": ["polygon"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Infrastruktur dalam area poligon berhasil ditemukan",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Infrastructure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/infrastructure/{name}": {
+        "put": {
+          "summary": "Memperbarui infrastruktur berdasarkan nama",
+          "parameters": [
+            {
+              "name": "name",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "example": "jalan" },
+                    "status": { "type": "string", "example": "dalam perbaikan" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Infrastruktur berhasil diperbarui",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Infrastructure"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Infrastruktur tidak ditemukan"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Menghapus infrastruktur berdasarkan nama",
+          "parameters": [
+            {
+              "name": "name",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Infrastruktur berhasil dihapus"
+            },
+            "404": {
+              "description": "Infrastruktur tidak ditemukan"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Infrastructure": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "example": "Jalan ABC" },
+            "type": { "type": "string", "example": "jalan" },
+            "latitude": { "type": "number", "example": -6.200000 },
+            "longitude": { "type": "number", "example": 106.816666 },
+            "status": { "type": "string", "example": "baik" }
+          }
+        }
+      }
+    }
+  }
+  

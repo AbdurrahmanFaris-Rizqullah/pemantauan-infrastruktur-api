@@ -21,7 +21,9 @@ function isPointInPolygon(point, polygon) {
 
 // Controller untuk mendapatkan infrastruktur dalam area poligon
 const infrastructureController = {
-  // Handler untuk membuat infrastruktur
+
+  
+  
   async createInfrastructure(req, res, next) {
     try {
       const { name, type, latitude, longitude, description, status } = req.body;
@@ -198,5 +200,39 @@ const infrastructureController = {
   }
 
 }
+
+
+
+/**
+ * @swagger
+ * /infrastructure:
+ *   get:
+ *     summary: Mendapatkan semua infrastruktur
+ *     tags: [Infrastructure]
+ *     responses:
+ *       200:
+ *         description: Berhasil mengambil semua infrastruktur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                   latitude:
+ *                     type: string
+ *                   longitude:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ */
+
+
 
 module.exports = infrastructureController;

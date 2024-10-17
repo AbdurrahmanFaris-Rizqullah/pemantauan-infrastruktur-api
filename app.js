@@ -3,11 +3,18 @@ const app = express();
 const infrasRoutes = require('./Routers/infrastructureRouter');
 const errorHandler = require('./middlewares/errorHandler');
 const bodyParser = require('body-parser');
+const swaggerDocs = require('./config/swagger');
+const swaggerUi = require('swagger-ui-express');
+const fs = require('fs');
+const path  = require('path');
 
+
+const swaggerDocument = JSON.parse(fs.readFileSync(path.join(__dirname, './swagger.json'), 'utf-8'));
 
 app.use(bodyParser.json());
 app.use(express.json());
 app.use('/api', infrasRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));  // untuk menangani URL encoded
 
