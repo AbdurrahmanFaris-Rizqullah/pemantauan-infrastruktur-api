@@ -6,6 +6,10 @@ function errorHandler(err, req, res, next) {
         status = 400;
         message = "name/ type/ Coordinat/ Status infrastructure cannot be empty";
         break;
+      case "invalid input format":
+        status = 400;
+        message = "format angka kawan, bukan huruf dan teman2 nya";
+        break;
       case "invalid input name":
         status = 400;
         message = "wrong input name Infrastructure";

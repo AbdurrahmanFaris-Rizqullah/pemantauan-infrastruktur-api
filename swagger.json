@@ -7,7 +7,7 @@
     },
     "servers": [
       {
-        "url": "http://localhost:3000/api-docs",
+        "url": "http://localhost:3000/api",
         "description": "Local Server"
       }
     ],
@@ -106,7 +106,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "polygon": {
+                    "coordinates": {
                       "type": "array",
                       "items": {
                         "type": "object",
@@ -118,7 +118,7 @@
                       }
                     }
                   },
-                  "required": ["polygon"]
+                  "required": ["coordinates"]
                 }
               }
             }
@@ -208,10 +208,10 @@
           "type": "object",
           "properties": {
             "name": { "type": "string", "example": "Jalan ABC" },
-            "type": { "type": "string", "example": "jalan" },
+            "type": { "type": "string/Enum", "Enum": "'jalan', 'trotoar', 'lampu jalan', 'jembatan', 'drainase'" },
             "latitude": { "type": "number", "example": -6.200000 },
             "longitude": { "type": "number", "example": 106.816666 },
-            "status": { "type": "string", "example": "baik" }
+            "status": { "type": "string/Enum", "Enum": "'baik', 'rusak', 'dalam perbaikan'" }
           }
         }
       }

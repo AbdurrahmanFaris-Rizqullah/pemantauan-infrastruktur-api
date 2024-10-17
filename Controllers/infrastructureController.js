@@ -175,18 +175,31 @@ const infrastructureController = {
             throw { name: "invalid input coordinate" };
         }
 
-        // Dapatkan semua infrastruktur dari database
-        const infrastructures = await Infrastructure.findAll();
+        for (const point of coordinates) {
+            if (typeof point.latitude !== 'number' || typeof point.longitude !== 'number') {
+                throw { name: "invalid input format" };
+            }
+        }
 
-        // Filter infrastruktur berdasarkan apakah titiknya berada dalam poligon
+        // Dapatkan semua infrastruktur dari database
+        const infrastructures = await Infrastructure.findAll({
+            attributes: ['latitude', 'longitude'], // Hanya ambil field yang diperlukan
+        });
+
+        console.log("Infrastruktur dari database:", infrastructures);
+
+        // Filter infrastruktur yang berada dalam poligon
         const infrastructuresInPolygon = infrastructures.filter(infrastructure => {
             const point = {
-                latitude: infrastructure.latitude,
-                longitude: infrastructure.longitude,
+                latitude: parseFloat(infrastructure.latitude), // Pastikan data dari database dalam bentuk angka
+                longitude: parseFloat(infrastructure.longitude)
             };
+
             // Cek apakah titik infrastruktur berada di dalam poligon
-            return isPointInPolygon(point, coordinates.map(c => ({ latitude: c.latitude, longitude: c.longitude })));
+            return isPointInPolygon(point, coordinates);
         });
+
+        console.log("Infrastruktur dalam poligon:", infrastructuresInPolygon);
 
         // Jika tidak ada infrastruktur yang ditemukan di dalam poligon
         if (infrastructuresInPolygon.length === 0) {
@@ -195,10 +208,10 @@ const infrastructureController = {
 
         res.status(200).json(infrastructuresInPolygon);
     } catch (err) {
+        console.error(err);
         next(err);
     }
-  }
-
+}
 }
 
 

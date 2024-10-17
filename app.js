@@ -13,8 +13,8 @@ const swaggerDocument = JSON.parse(fs.readFileSync(path.join(__dirname, './swagg
 
 app.use(bodyParser.json());
 app.use(express.json());
-app.use('/api', infrasRoutes);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api', infrasRoutes, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use('/api-docs', );
 app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));  // untuk menangani URL encoded
 
